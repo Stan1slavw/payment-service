@@ -1,0 +1,146 @@
+version: "3.9"
+
+name: practice-microservices
+
+networks:
+  practice-net:
+    driver: bridge
+
+volumes:
+  pg_user_data:
+  pg_order_data:
+  pg_payment_data:
+  prometheus_data:
+  grafana_data:
+
+services:
+  # ---------- Kafka ----------
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.1
+    environment:
+      ZOOKEEPER_CLIENT_PORT: "2181"
+      ZOOKEEPER_TICK_TIME: "2000"
+    networks: [practice-net]
+    restart: unless-stopped
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.1
+    depends_on:
+      - zookeeper
+    ports:
+      # Для локальных приложений (IntelliJ) подключайся к localhost:29092
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: "1"
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+
+      # два listener'а: внутренний для Docker-сети, внешний для хоста
+      KAFKA_LISTENERS: "PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:29092"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
+
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: "0"
+    networks: [practice-net]
+    restart: unless-stopped
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    depends_on:
+      - kafka
+    ports:
+      - "8089:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: "local"
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "kafka:9092"
+    networks: [practice-net]
+    restart: unless-stopped
+
+  # ---------- Postgres (3 DB) ----------
+  postgres-user:
+    image: postgres:16-alpine
+    ports:
+      - "15432:5432"
+    environment:
+      POSTGRES_DB: "user_db"
+      POSTGRES_USER: "user"
+      POSTGRES_PASSWORD: "user"
+    volumes:
+      - pg_user_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d user_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [practice-net]
+    restart: unless-stopped
+
+  postgres-order:
+    image: postgres:16-alpine
+    ports:
+      - "15433:5432"
+    environment:
+      POSTGRES_DB: "order_db"
+      POSTGRES_USER: "order"
+      POSTGRES_PASSWORD: "order"
+    volumes:
+      - pg_order_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U order -d order_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [practice-net]
+    restart: unless-stopped
+
+  postgres-payment:
+    image: postgres:16-alpine
+    ports:
+      - "15434:5432"
+    environment:
+      POSTGRES_DB: "payment_db"
+      POSTGRES_USER: "payment"
+      POSTGRES_PASSWORD: "payment"
+    volumes:
+      - pg_payment_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U payment -d payment_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [practice-net]
+    restart: unless-stopped
+
+  # ---------- Monitoring ----------
+  prometheus:
+    image: prom/prometheus:v2.53.1
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+    extra_hosts:
+      # Чтобы host.docker.internal работал и на Linux (на Windows обычно и так есть)
+      - "host.docker.internal:host-gateway"
+    networks: [practice-net]
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.1.0
+    depends_on:
+      - prometheus
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: "admin"
+      GF_SECURITY_ADMIN_PASSWORD: "admin"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks: [practice-net]
+    restart: unless-stopped
