@@ -1,8 +1,7 @@
 package com.stanislav.orderservice.api.request;
 
-import com.stanislav.orderservice.enums.OrderStatus;
+import com.stanislav.orderservice.entity.enums.OrderStatus;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
 
 import java.math.BigDecimal;
 

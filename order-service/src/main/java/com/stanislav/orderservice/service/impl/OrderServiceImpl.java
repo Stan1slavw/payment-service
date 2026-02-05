@@ -1,25 +1,24 @@
 package com.stanislav.orderservice.service.impl;
 
+import com.stanislav.orderservice.api.dto.OrderCreateEvent;
 import com.stanislav.orderservice.api.dto.OrderDTO;
 import com.stanislav.orderservice.api.mapper.OrderMapper;
 import com.stanislav.orderservice.api.request.CreateOrderRequest;
 import com.stanislav.orderservice.api.request.UpdateOrderRequest;
 import com.stanislav.orderservice.api.response.OrderResponse;
 import com.stanislav.orderservice.entity.Order;
-import com.stanislav.orderservice.enums.OrderStatus;
+import com.stanislav.orderservice.entity.enums.OrderStatus;
 import com.stanislav.orderservice.repo.OrderRepository;
 import com.stanislav.orderservice.service.OrderService;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.extern.log4j.Log4j;
 import lombok.extern.log4j.Log4j2;
 import org.jspecify.annotations.NonNull;
-import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @Log4j2
@@ -27,10 +26,12 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public OrderServiceImpl(OrderRepository orderRepository, OrderMapper orderMapper) {
+    public OrderServiceImpl(OrderRepository orderRepository, OrderMapper orderMapper, ApplicationEventPublisher eventPublisher) {
         this.orderRepository = orderRepository;
         this.orderMapper = orderMapper;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -45,6 +46,15 @@ public class OrderServiceImpl implements OrderService {
                 .build();
 
         Order saved = orderRepository.save(order);
+
+        eventPublisher.publishEvent(new OrderCreateEvent(
+                UUID.randomUUID(),
+                saved.getId(),
+                saved.getUserId(),
+                saved.getAmount(),
+                saved.getCurrency(),
+                saved.getCreatedAt()
+        ));
 
         return orderMapper.toOrderResponse(saved);
     }

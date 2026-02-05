@@ -1,11 +1,10 @@
 package com.stanislav.orderservice.entity;
 
-import com.stanislav.orderservice.enums.OrderStatus;
+import com.stanislav.orderservice.entity.enums.OrderStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 

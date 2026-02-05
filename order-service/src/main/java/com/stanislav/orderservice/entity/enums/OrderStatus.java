@@ -1,4 +1,4 @@
-package com.stanislav.orderservice.enums;
+package com.stanislav.orderservice.entity.enums;
 
 
 public enum OrderStatus {

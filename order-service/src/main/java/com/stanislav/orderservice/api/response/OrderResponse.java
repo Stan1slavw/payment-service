@@ -1,6 +1,6 @@
 package com.stanislav.orderservice.api.response;
 
-import com.stanislav.orderservice.enums.OrderStatus;
+import com.stanislav.orderservice.entity.enums.OrderStatus;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
