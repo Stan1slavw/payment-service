@@ -45,4 +45,26 @@ public class Order {
     @Version
     @Column(name = "version", nullable = false)
     private Integer version;
+
+    @PrePersist
+    void onCreate() {
+        var now = OffsetDateTime.now();
+        this.createdAt = now;
+        this.updatedAt = now;
+    }
+
+    @PreUpdate
+    void preUpdate(){
+        this.updatedAt = OffsetDateTime.now();
+    }
+
+    public void markPaid(){
+        this.orderStatus = OrderStatus.PAID;
+    }
+
+    public void markFailed(){
+        this.orderStatus = OrderStatus.FAILED;
+    }
+
+
 }
