@@ -1,6 +1,6 @@
 package com.stanislav.orderservice.api.dto;
 
-import com.stanislav.orderservice.enums.OrderStatus;
+import com.stanislav.orderservice.entity.enums.OrderStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
