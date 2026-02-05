@@ -1,7 +1,9 @@
 package com.stanislav.orderservice.service.impl;
 
+import com.stanislav.orderservice.api.dto.OrderDTO;
 import com.stanislav.orderservice.api.mapper.OrderMapper;
 import com.stanislav.orderservice.api.request.CreateOrderRequest;
+import com.stanislav.orderservice.api.request.UpdateOrderRequest;
 import com.stanislav.orderservice.api.response.OrderResponse;
 import com.stanislav.orderservice.entity.Order;
 import com.stanislav.orderservice.enums.OrderStatus;
@@ -17,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Log4j2
@@ -71,11 +74,20 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<Order> getAllOrders() {
+    public List<OrderDTO> getAllOrders() {
         log.info("Method name: getAllOrders");
         if (orderRepository.findAll().isEmpty()) {
             log.info("Order list is empty");
         }
-        return orderRepository.findAll();
+        return orderRepository.findAll().stream().map(orderMapper::toOrderDTO).toList();
+    }
+
+    @Override
+    @Transactional
+    public OrderResponse updateOrder(UUID orderId, UpdateOrderRequest updateOrderRequest) {
+        log.info("Method name: updateOrder");
+        Order order = orderRepository.findById(orderId).orElseThrow(()-> new EntityNotFoundException("Order with this id " + orderId + " not found"));
+        orderMapper.updateOrderFromRequest(updateOrderRequest, order);
+        return orderMapper.toOrderResponse(order);
     }
 }

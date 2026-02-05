@@ -1,6 +1,8 @@
 package com.stanislav.orderservice.service;
 
+import com.stanislav.orderservice.api.dto.OrderDTO;
 import com.stanislav.orderservice.api.request.CreateOrderRequest;
+import com.stanislav.orderservice.api.request.UpdateOrderRequest;
 import com.stanislav.orderservice.api.response.OrderResponse;
 import com.stanislav.orderservice.entity.Order;
 import org.springframework.stereotype.Service;
@@ -18,5 +20,7 @@ public interface OrderService {
 
     void markFailed(UUID orderId, String reason);
 
-    List<Order> getAllOrders();
+    List<OrderDTO> getAllOrders();
+
+    OrderResponse updateOrder(UUID orderId, UpdateOrderRequest updateOrderRequest);
 }
