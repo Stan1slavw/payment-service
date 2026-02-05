@@ -23,4 +23,6 @@ public interface OrderService {
     List<OrderDTO> getAllOrders();
 
     OrderResponse updateOrder(UUID orderId, UpdateOrderRequest updateOrderRequest);
+
+    void deleteOrder(UUID orderId);
 }

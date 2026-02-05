@@ -34,6 +34,12 @@ public class OrderController {
         return orderService.createOrder(request);
     }
 
+    @DeleteMapping("/{id}")
+    public void deleteOrder(@PathVariable UUID id) {
+        log.info("Controller name: deleteOrder");
+        orderService.deleteOrder(id);
+    }
+
     @GetMapping("/{id}")
     public OrderResponse getOrderById(@PathVariable UUID id) {
         log.info("Controller name: getOrderById");

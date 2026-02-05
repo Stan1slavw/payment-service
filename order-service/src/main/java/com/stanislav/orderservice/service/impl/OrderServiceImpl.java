@@ -64,6 +64,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse getOrderById(UUID orderId) {
         log.info("Method name: getOrderById");
         Order order = orderRepository.findById(orderId).orElseThrow(()-> new EntityNotFoundException("Order with this id " + orderId + " not found"));
+        log.info("updatedAt from entity = {}", order.getUpdatedAt());
         return orderMapper.toOrderResponse(order);
     }
 
@@ -99,5 +100,12 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findById(orderId).orElseThrow(()-> new EntityNotFoundException("Order with this id " + orderId + " not found"));
         orderMapper.updateOrderFromRequest(updateOrderRequest, order);
         return orderMapper.toOrderResponse(order);
+    }
+
+    @Override
+    public void deleteOrder(UUID orderId) {
+        log.info("Method name: deleteOrder");
+        Order order = orderRepository.findById(orderId).orElseThrow(()-> new EntityNotFoundException("Order with this id " + orderId + " not found"));
+        orderRepository.deleteById(order.getId());
     }
 }

@@ -13,6 +13,6 @@ public record OrderResponse(
         String currency,
         OrderStatus orderStatus,
         OffsetDateTime createdAt,
-        OffsetDateTime updateAt
+        OffsetDateTime updatedAt
 ) {
 }
