@@ -1,7 +1,6 @@
 package com.stanislav.orderservice.kafka;
 
 import com.stanislav.orderservice.api.dto.OrderCreateEvent;
-import com.stanislav.orderservice.entity.Order;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
@@ -10,12 +9,12 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 @Log4j2
 @Component
-public class OrderCreatedKafkaPublisher {
+public class OrderCreatedKafkaProducer {
 
     private final KafkaTemplate<String, OrderCreateEvent> orderKafkaTemplate;
     private final KafkaTopicsProperties topics;
 
-    public OrderCreatedKafkaPublisher(KafkaTemplate<String, OrderCreateEvent> orderKafkaTemplate, KafkaTopicsProperties topics) {
+    public OrderCreatedKafkaProducer(KafkaTemplate<String, OrderCreateEvent> orderKafkaTemplate, KafkaTopicsProperties topics) {
         this.orderKafkaTemplate = orderKafkaTemplate;
         this.topics = topics;
     }

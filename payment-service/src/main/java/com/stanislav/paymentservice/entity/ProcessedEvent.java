@@ -22,6 +22,6 @@ public class ProcessedEvent {
     @Column(name = "event_id", nullable = false, updatable = false)
     private UUID eventId;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private OffsetDateTime createdAt;
+    @Column(name = "processed_at", nullable = false, updatable = false)
+    private OffsetDateTime processedAt;
 }
